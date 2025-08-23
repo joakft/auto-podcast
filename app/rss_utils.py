@@ -42,7 +42,7 @@ def ensure_feed_exists():
         # Owner info (required)
         owner = ET.SubElement(channel, "{http://www.itunes.com/dtds/podcast-1.0.dtd}owner")
         ET.SubElement(owner, "{http://www.itunes.com/dtds/podcast-1.0.dtd}name").text = "joakft"
-        ET.SubElement(owner, "{http://www.itunes.com/dtds/podcast-1.0.dtd}email").text = "seuemail@example.com"
+        ET.SubElement(owner, "{http://www.itunes.com/dtds/podcast-1.0.dtd}email").text = "joakft@gmail.com"
 
         tree = ET.ElementTree(rss)
         tree.write(RSS_FILE, encoding="utf-8", xml_declaration=True)

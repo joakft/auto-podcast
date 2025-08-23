@@ -1,137 +1,105 @@
-Sure! Here's the **entire `README.md`** for the **generated project** (i.e. inside `app_template/`), in one single code block — ready to copy-paste as `README.md`:
+# 🎧 Auto Podcast Generator
 
-````markdown
-# {{ project_name }}
-
-This project was scaffolded using the [joakft/templates](https://github.com/joakft/templates) system.  
-It is a reproducible, container-ready, developer-friendly Python app skeleton using:
-
-- [`uv`](https://github.com/astral-sh/uv) for dependency & environment management
-- `.env` files for safe secret handling
-- `Makefile` for common workflows
-- `Dockerfile` for containerization
-- `pytest` for testing
-- Standard `app/` and `tests/` structure
+This project turns ideas into spoken audio episodes using LLM + TTS, uploads them to **AWS S3**, and maintains a public **RSS feed** that can be used in any podcast player (including Android Auto).
 
 ---
 
-## 🚀 Quickstart
+## 🔒 .gitignore (IMPORTANT)
 
-### 1. Install dependencies and prepare environment
+Make sure to add the following entries to your `.gitignore` to avoid exposing sensitive data:
 
-```bash
-chmod +x setup.sh run.sh docker-run.sh
-./setup.sh
+```
+.env
+*.mp3
+feed.xml
+__pycache__/
+.venv/
 ```
 
-This will:
-- Install Python dependencies with `uv`
-- Copy `.env.example` → `.env` (if `.env` doesn't exist)
-- Export `requirements.txt` for compatibility
+- `.env` → stores AWS and OpenAI credentials. **Never commit this file.**
+- `*.mp3` → generated episode audio files.
+- `feed.xml` → your auto-generated RSS feed.
+- `.venv/` and `__pycache__/` → local environment/build folders.
 
-### 2. Run the app
+---
+
+## ⚙️ How It Works
+
+1. You type a **prompt** in the Gradio interface.
+2. A language model generates a **narrative/story/lesson**.
+3. The text is converted to **MP3 audio** using OpenAI TTS.
+4. The MP3 is uploaded to your **AWS S3 bucket**.
+5. The RSS feed (`feed.xml`) is updated and also uploaded to S3.
+
+You can subscribe to the RSS feed in any podcast app that supports custom feeds.
+
+---
+
+## 🚀 Running the Project
+
+### Requirements
+
+- Python 3.11+
+- AWS account with S3 configured
+- OpenAI API key
+- Environment variables defined in `.env`:
+
+```env
+OPENAI_API_KEY=your_openai_key
+AWS_ACCESS_KEY_ID=your_aws_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret
+AWS_REGION=us-east-2
+AWS_BUCKET_NAME=my-ai-podcast
+```
+
+### Setup
 
 ```bash
-./run.sh
-# OR
+make setup
+```
+
+### Run the Gradio interface
+
+```bash
 make run
 ```
 
-You should see:
-
-```
-Hello, World!
-```
-
----
-
-## 🧪 Running Tests
-
-This template uses `pytest`. Run tests with:
-
-```bash
-make test
-```
-
-You can also run:
-
-```bash
-uv run pytest tests/
-```
-
----
-
-## 🐳 Running with Docker
-
-```bash
-make docker
-```
-
-This builds the Docker image and runs the app inside it, using your `.env` file for config.
-
----
-
-## 🧰 Makefile Shortcuts
-
-| Command        | Description                          |
-|----------------|--------------------------------------|
-| `make setup`   | Sync deps, create `.env`, export reqs |
-| `make run`     | Run app locally (`uv run`)            |
-| `make test`    | Run tests with pytest                 |
-| `make docker`  | Build and run Docker container        |
-| `make export`  | Re-export `requirements.txt` from lock |
-| `make clean`   | Remove caches, `.venv`, lock          |
+Open in your browser:  
+[http://localhost:7860](http://localhost:7860)
 
 ---
 
 ## 📂 Project Structure
 
 ```
-.
-├── app/               # Application code
-│   ├── __init__.py
-│   ├── main.py        # Entry point
-│   └── core.py        # Example logic
-│
-├── tests/             # Unit tests
-│   └── test_core.py
-│
-├── .env.example       # Template for secrets
-├── .gitignore         # Ignores env, cache, etc.
-├── pyproject.toml     # uv-managed dependencies
-├── uv.lock            # Lockfile for reproducibility
-├── requirements.txt   # Exported from lock for compatibility
-├── Makefile           # Dev commands
-├── Dockerfile         # Container build
-├── setup.sh           # Setup script
-├── run.sh             # Run locally
-└── docker-run.sh      # Run with Docker
+app/
+ ├─ main.py          # Gradio UI + backend logic
+ ├─ storage.py       # S3 upload functions
+ ├─ rss_utils.py     # RSS feed creation and updates
+ └─ prompts.py       # Prompt style definitions (PT/EN/ES)
+
+tmp/                 # Temporary folder for MP3s
+feed.xml             # RSS feed (auto-generated and uploaded to S3)
 ```
 
 ---
 
-## 🔐 Secrets
+## 📡 RSS Feed
 
-- App secrets and environment variables go in `.env` (excluded from Git)
-- Always keep `.env.example` updated as reference
+Each new episode updates the `feed.xml` file and uploads it to your S3 bucket.
 
----
+Your public RSS feed URL will look like:
 
-## 🧱 Built With
+```
+https://<your-bucket>.s3.<region>.amazonaws.com/rss/feed.xml
+```
 
-- [uv](https://github.com/astral-sh/uv) – fast, reliable dependency manager
-- [python-dotenv](https://pypi.org/project/python-dotenv/) – for loading `.env`
-- [pytest](https://docs.pytest.org/) – for testing
-- Docker – for containerization
-- Bash + Make – for developer ergonomics
+You can paste this into any podcast player that supports RSS feeds.
 
 ---
 
-## 📄 License
+## 📝 Notes
 
-MIT License – free to use, fork, and adapt.
-
----
-
-Generated using [joakft/templates](https://github.com/joakft/templates)
-````
+- Upload a square **cover image** (1400×1400 to 3000×3000 px) to S3 and reference it in `rss_utils.py`.
+- The generated feed is RSS 2.0 with iTunes extensions, compatible with all major podcast apps.
+- You can run this locally or deploy as a Flask/Gradio service with minimal effort.

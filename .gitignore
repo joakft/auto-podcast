@@ -8,6 +8,10 @@ __pycache__/
 
 # Environment files
 .env
+*.mp3
+feed.xml
+pycache/
+.venv/
 
 # OS-specific
 .DS_Store
