@@ -16,6 +16,7 @@ from app.storage import upload_file
 from app.rss_utils import add_episode
 from datetime import datetime
 
+client = openai.OpenAI()
 
 
 # Load API key
@@ -82,12 +83,19 @@ def make_audio():
     if not last_text:
         return None, "No text available to convert."
 
-    with openai.audio.speech.with_streaming_response.create(
+    response = client.audio.speech.create(
         model="gpt-4o-mini-tts",
-        voice="alloy",  # Alloy handles EN/PT/ES fairly well
-        input=last_text
-    ) as response:
-        response.stream_to_file(last_audio_file)
+        voice="nova",
+        input=(
+            f"{last_text}"
+        ),
+        instructions=("Please read the following text in a deep, authoritative voice. "
+            "Speak with a lot of inflexion to persuade, pausing for a beat after each sentence."
+        ),
+        speed = 0.85
+            
+    )
+    response.stream_to_file(last_audio_file)
 
     return str(last_audio_file), f"Audio saved to {last_audio_file}"
 
